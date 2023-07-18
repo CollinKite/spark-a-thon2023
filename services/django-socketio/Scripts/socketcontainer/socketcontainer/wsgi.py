@@ -78,7 +78,7 @@ def handlerUser(sid, data):
 
 @sio.on("handle_connect")
 def handleUserRoom(sid, data):
-    sio.enter_room(sid, data["userID"])
+    sio.enter_room(sid, data["userId"])
     sio.emit("entered_room", "user successfully entered own instance")
 
 

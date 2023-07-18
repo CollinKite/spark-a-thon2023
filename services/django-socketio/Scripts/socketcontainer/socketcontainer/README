@@ -1,0 +1,24 @@
+For the socket messages:
+
+user_prompt: Expects several pieces of data in the body: userId, params(tbd if needed or replaced), 
+jiraToken, userPrompt
+
+User id is the standard ID pulled from the database - this means the client must pull from the
+REST API database and send it back. 
+
+Params are general values meant to be sent to either the Jira API or the promptAPI - it is very much a placeholder.
+
+jiraToken is the authentication token for usage with Jira services.
+
+userPrompt is what the user entered as a search value or question.
+
+The response will be finished_prompt_msg.
+
+finished_prompt_msg: This message is a full response of what the AI API responded with and prompt were.
+Any Jira data that we grabbed is also sent back.
+
+error_msg: A simple response that consists of one dictionary that contains an error message and echoed back to the userID that sent a request.
+
+handle_connect: Expects one piece of data in the body: userId
+
+responds with entered_room which is a simple confirmation of the user being assigned to a room.
