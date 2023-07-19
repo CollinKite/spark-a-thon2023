@@ -66,3 +66,25 @@ textarea{
   margin: 5px;
   width: fit-content;
 }
+
+#messagesUser{
+  border: 2px #000000 solid;
+  border-radius: 5px;
+  padding: 3px;
+  margin-bottom: 2px;
+  width: fit-content;
+  height: fit-content;
+  text-align: left;
+}
+
+#messagesAI{
+  /* display: flex; */
+  
+  text-align: right;
+  border: 2px #000000 solid;
+  border-radius: 5px;
+  padding: 3px;
+  margin-bottom: 2px;
+  /* width: fit-content; */
+  height: fit-content;
+}
