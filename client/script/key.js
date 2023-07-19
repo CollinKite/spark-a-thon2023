@@ -6,12 +6,8 @@ var submitKey = (evt) =>{
     console.log(apiInput.value);
     if(apiInput.value == ""){
         window.location.href = "acesskey.html";
-        console.log(apiInput.value);
-        console.log("form is null");
     }else{
         window.location.href = "index.html";
-        console.log(apiInput.value);
-        console.log("form is not null");
     }
 }
 form.addEventListener('submit', submitKey)  
