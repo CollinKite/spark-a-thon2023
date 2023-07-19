@@ -1,4 +1,5 @@
 python-socketio
 djangorestframework
 eventlet
+cryptography
 pyjwt
