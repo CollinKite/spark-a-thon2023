@@ -1,3 +1,4 @@
 python-socketio
 djangorestframework
 eventlet
+pyjwt
