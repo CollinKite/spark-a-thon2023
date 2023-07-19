@@ -46,8 +46,9 @@ body {
   flex-direction: row;
 }
 
-#inputBox{
+textarea{
   width: 600px;
+  resize: none;
 }
 
 #submit{
