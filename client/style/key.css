@@ -1,15 +1,19 @@
-#submit{
+#submit {
     margin-left: 3px;
     border-radius: 100px;
     font-size: 20px;
 }
 
-#box{
+#submit:hover {
+    cursor: pointer;
+}
+
+#box {
     display: flex;
     flex-direction: row;
 }
 
-#container{
+#container {
     border: 2px #000000 solid;
     border-radius: 10px;
     width: fit-content;
@@ -17,6 +21,6 @@
     margin: 5px;
 }
 
-textarea{
+textarea {
     resize: none;
 }
