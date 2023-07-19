@@ -1,7 +1,9 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { DrizzleModule } from "./modules/drizzle";
 import { AuthModule } from "./modules/auth";
+import { DrizzleModule } from "./modules/drizzle";
+import { MessagesModule } from "./modules/messages";
+import { RoomsModule } from "./modules/rooms";
 
 @Module({
   imports: [
@@ -11,6 +13,8 @@ import { AuthModule } from "./modules/auth";
       envFilePath: `.env.${process.env.NODE_ENV}`,
     }),
     DrizzleModule,
+    MessagesModule,
+    RoomsModule,
   ],
   controllers: [],
   providers: [],
