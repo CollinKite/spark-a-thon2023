@@ -1,5 +1,5 @@
 body {
-  width: 200px;
+  width: 350px;
   height: 300px;
   padding: 0;
   margin: 0p;
@@ -11,17 +11,33 @@ body {
   border: 2px #000000 solid;
   border-radius: 20px;
   height: 300px;
-  width: fit-content;
+  width: 280px;
   padding: 10px;
   margin: 10px;
+}
+
+#boxybox{
+  display: flex;
+}
+
+#history{
+  border: 2px #000000 solid;
+  padding: 10px;
+  margin: 5px;
+  margin-right: 0;
+  height: 200px;
+  border-radius: 10px;
+  width: min-content;
 }
 
 #messageBox{
   border: 2px #000000 solid;
   border-radius: 10px;
   height: 200px;
+  width: 200px;
   padding: 10px;
   margin: 5px;
+  margin-left: 0;
   margin-bottom: 20px;
 }
 
@@ -30,8 +46,19 @@ body {
   flex-direction: row;
 }
 
+#inputBox{
+  width: 600px;
+}
+
 #submit{
   margin-left: 3px;
   border-radius: 100px;
   font-size: 20px;
+}
+
+#container{
+  border: 3px #000000 solid;
+  padding: 5px;
+  margin: 5px;
+  width: fit-content;
 }
