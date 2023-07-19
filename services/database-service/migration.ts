@@ -1,7 +1,7 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import { migrate } from "drizzle-orm/postgres-js/migrator";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { config } from "dotenv";
-import * as postgres from "postgres";
+import { Client } from "pg";
 
 config({
   path: `.env.${process.env.NODE_ENV}`,
@@ -18,7 +18,11 @@ const main = async () => {
 
   const connectionString = `postgres://${config.user}:${config.password}@${config.host}:${config.port}`;
 
-  const client = postgres(connectionString, { max: 1 });
+  const client = new Client({
+    connectionString,
+  });
+
+  await client.connect();
 
   const db = drizzle(client);
 

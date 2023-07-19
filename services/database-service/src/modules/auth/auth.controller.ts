@@ -1,6 +1,8 @@
-import { Body, Controller, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Post, Req, UseGuards } from "@nestjs/common";
 import { AuthService } from "./services";
 import { ValidateServer } from "./auth.service.types";
+import { RtGuard } from "./guards";
+import type { Request } from "express";
 
 @Controller("auth")
 export class AuthController {
@@ -11,6 +13,16 @@ export class AuthController {
     @Body()
     validateServer: ValidateServer,
   ) {
-    return await this.authService.validateServer(validateServer);
+    const result = await this.authService.validateServer(validateServer);
+
+    return {
+      status: "ok",
+      statusCode: 200,
+      data: result,
+    };
   }
+
+  @Post("refresh-token")
+  @UseGuards(RtGuard)
+  async refreshToken(@Req() req: Request) {}
 }

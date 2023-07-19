@@ -1,7 +1,6 @@
 import { Global, Module } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { drizzle } from "drizzle-orm/postgres-js";
-import * as postgres from "postgres";
+import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "@/schemas";
 
 import {
@@ -9,6 +8,7 @@ import {
   getDrizzleInstanceToken,
 } from "./drizzle.constants";
 import { Database, DrizzleConfig } from "./drizzle.types";
+import { Client } from "pg";
 
 @Global()
 @Module({
@@ -20,7 +20,6 @@ import { Database, DrizzleConfig } from "./drizzle.types";
         const getDatabaseConfig = async (): Promise<DrizzleConfig> => {
           return {
             host: config.get<string>("PG_HOST"),
-            database: config.get<string>("PG_DATABASE"),
             port: config.get<number>("PG_PORT"),
             user: config.get<string>("PG_USER"),
             password: config.get<string>("PG_PASSWORD"),
@@ -34,17 +33,18 @@ import { Database, DrizzleConfig } from "./drizzle.types";
       provide: getDrizzleInstanceToken(),
       inject: [getDrizzleConfigToken()],
       useFactory: async ({
-        database,
         host,
         password,
         user,
         ...config
       }: DrizzleConfig): Promise<Database> => {
-        const uri = `postgres://${user}:${password}@${host}${
-          process.env.NODE_ENV === "docker" ? `:${config.port}` : ""
-        }/${database}`;
+        const uri = `postgres://${user}:${password}@${host}:${config.port}`;
 
-        const client = postgres(uri);
+        const client = new Client({
+          connectionString: uri,
+        });
+
+        await client.connect();
 
         const db = drizzle(client, { logger: true, schema });
 
