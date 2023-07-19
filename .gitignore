@@ -1,2 +1,5 @@
 django-socketio/Lib
 database/
+services/django-socketio/Lib
+services/django-socketio/Include
+services/data/
