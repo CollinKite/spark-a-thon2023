@@ -25,6 +25,8 @@ services:
     restart: always
     env_file:
       - ./database-service/.env.docker
+    ports:
+      - 8080:8080
     depends_on:
       - db
 
