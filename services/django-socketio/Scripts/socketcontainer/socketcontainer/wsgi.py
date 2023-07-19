@@ -8,8 +8,6 @@ https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
 """
 
 import os
-import traceback
-
 import eventlet
 import socketio
 import requests
@@ -57,7 +55,7 @@ def handlerUser(sid, data):
 
     responseAICode = aiResponse.status_code
 
-    if(responseAICode != 200):
+    if(responseAICode != 201):
         sio.emit("error_msg", {"msg": "error getting a ai response"}, room=data["roomId"])
         return
     
@@ -80,40 +78,84 @@ def handlerUser(sid, data):
 
 @sio.on("handle_connect")
 def handleUserRoom(sid, data):
+
+    if(checkCredentials(sid, data["accessToken"], data["refreshToken"]) == False):
+        sio.emit("error_msg", "Authentication expired!")
+        sio.disconnect(sid=sid)
+    
+    userId = data["userId"]
+
+    userCreateUrl = "https://placeholderDBUrl/database/getUser"
+
+    createPayload = {"userId": userId}
+
+    requestForNewUser = requests.post(userCreateUrl, data=createPayload)
+
+    if(requestForNewUser.status_code != 201):
+        sio.emit("error_msg", {"msg": "Error retrieving new user"}, to=sid)
+        sio.disconnect(sid)
+        return
+    
+    userData = requestForNewUser.json()
+
+
+    sio.emit("update_user_id", {"userId": userData["userId"]})
+
+@sio.on("create_room")
+def createRoom(sid, data):
+
+    if(checkCredentials(sid, data["accessToken"], data["refreshToken"]) == False):
+        sio.emit("error_msg", "Authentication expired!")
+        sio.disconnect(sid=sid)
+
+    roomRequestUrl = "https://placeholderGetRoomId/database/rooms"
+
+    roomPayload = {"userId": data["userId"]}
+
+    requestForNewRoom = requests.post(roomRequestUrl, params=roomPayload)
+
+    if(requestForNewRoom.status_code != 201):
+        sio.emit("error_msg", {"msg": "Error creating new room"}, to=sid)
+        return
+    
+    roomDict = {"roomId": requestForNewRoom.json()["roomId"]}
+
+    sio.emit("update_room_id", data=roomDict)
+
+    sio.enter_room(sid, roomDict["roomId"])
+    sio.emit("entered_room", "user successfully entered own room", room=roomDict["roomId"])
+
+
+def checkCredentials(sid:str, authToken:str, refreshToken:str):
     try:
-        decodedToken = jwt.decode(data["token"])
+        decodedToken = jwt.decode(authToken)
         print(decodedToken)
 
-        sio.enter_room(sid, data["roomId"])
-        sio.emit("token_update", {"refresh_token":data["refreshToken"], "authentication_token": data["token"]}, room=data["roomId"])
-        sio.emit("entered_room", "user successfully entered own instance", room=data["roomId"])
+        sio.emit("token_update", {"refresh_token": refreshToken, "authentication_token": authToken}, to=sid)
+        return True
     except:
         try:
-            decodedToken = jwt.decode(data["refreshToken"])
+            decodedRefreshToken = jwt.decode(refreshToken)
 
-            refreshUrl = "http://placeholderAuthAPI/refresh"
+            print(decodedRefreshToken)
 
-            payload = {"refresh_token": decodedToken}
+            refreshUrl = "http://placeholderAuthAPI/database/refresh-token"
+
+            payload = {"refresh_token": refreshToken}
 
             refreshResponse = requests.post(refreshUrl, data=payload)
 
             refreshStatus = refreshResponse.status_code
 
-            if refreshStatus == 400 or refreshStatus != 200:
+            if refreshStatus == 400 or refreshStatus != 201:
                 sio.emit("token_invalid", "token is expired or invalid")
             
             tokens = refreshResponse.json()
 
-            sio.enter_room(sid, data["roomId"])
-            sio.emit("token_update", {"refresh_token": tokens["refreshToken"], "authentication_token": tokens["authenticationToken"]}, room=data["roomId"])
-            sio.emit("entered_room", "user successfully entered own instance", room=data["roomId"])
-
-        except Exception as exception:
-            sio.disconnect(sid=sid)
-            traceback.print_exception(Exception, exception, exception.__traceback__)
-            print("token is invalid, refusing connection")
-
-        
+            sio.emit("token_update", {"refresh_token": tokens["refreshToken"], "authentication_token": tokens["accessToken"]}, to=sid)
+            return True
+        except:
+            return False
 
 
 
