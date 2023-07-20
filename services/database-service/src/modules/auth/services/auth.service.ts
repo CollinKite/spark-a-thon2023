@@ -26,7 +26,7 @@ export class AuthService {
   }
 
   private async validateCredentials(username: string, password: string) {
-    const SERVER_USER = this.config.get<string>("SERVER_USER");
+    const SERVER_USER = this.config.get<string>("SERVER_USERNAME");
     const SERVER_PASSWORD = this.config.get<string>("SERVER_PASSWORD");
 
     return (

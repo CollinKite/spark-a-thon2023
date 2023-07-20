@@ -1,9 +1,10 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { AuthModule } from "./modules/auth";
+import { AtGuard, AuthModule } from "./modules/auth";
 import { DrizzleModule } from "./modules/drizzle";
 import { MessagesModule } from "./modules/messages";
 import { RoomsModule } from "./modules/rooms";
+import { APP_GUARD } from "@nestjs/core";
 
 @Module({
   imports: [
@@ -17,6 +18,11 @@ import { RoomsModule } from "./modules/rooms";
     RoomsModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AtGuard,
+    },
+  ],
 })
 export class AppModule {}
