@@ -3,4 +3,5 @@ djangorestframework
 eventlet
 cryptography
 requests
+django-cors-headers
 pyjwt
