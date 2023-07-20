@@ -50,4 +50,14 @@ export class AuthService {
 
     return { accessToken, refreshToken } as const;
   }
+
+  public async verifyRefresh(token: string){
+
+    const decodeResult = this.jwtService.decode(token);
+
+    console.log(decodeResult)
+    
+    
+  }
+
 }

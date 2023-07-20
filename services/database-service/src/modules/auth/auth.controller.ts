@@ -20,4 +20,21 @@ export class AuthController {
       data: result,
     };
   }
+
+  @Post("refresh-token")
+  @UseGuards(RtGuard)
+  async refreshToken(
+    @Body()
+    refresh_token: string
+  ) {
+
+    await(this.authService.verifyRefresh(refresh_token));
+
+    return {
+      status: "ok",
+      statusCode: 200,
+      data: "test"
+    }
+
+  }
 }
