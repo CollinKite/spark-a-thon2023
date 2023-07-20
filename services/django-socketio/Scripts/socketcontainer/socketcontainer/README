@@ -10,7 +10,7 @@ Params are general values meant to be sent to either the Jira API or the promptA
 
 jiraToken is the authentication token for usage with Jira services.
 
-userPrompt is what the user entered as a search value or question.
+userMessages is what the user entered as a search value or question - this is appended onto all previous messages for a room.
 
 The response will be finished_prompt_msg.
 
