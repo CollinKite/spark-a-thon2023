@@ -14,21 +14,21 @@ services:
     ports:
       - 5432:5432
 
-  # database-service:
-  #   build:
-  #     context: ./database-service
-  #     dockerfile: dockerfile
-  #     target: production
-  #   networks:
-  #     - spark
-  #   command: sh -c "./command.sh"
-  #   restart: always
-  #   env_file:
-  #     - ./database-service/.env.docker
-  #   ports:
-  #     - 8080:8080
-  #   depends_on:
-  #     - db
+  database-service:
+    build:
+      context: ./database-service
+      dockerfile: dockerfile
+      target: production
+    networks:
+      - spark
+    command: sh -c "./command.sh"
+    restart: always
+    env_file:
+      - ./database-service/.env.docker
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
 
   websocket-service:
     build:
