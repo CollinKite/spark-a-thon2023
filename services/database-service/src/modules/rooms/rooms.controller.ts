@@ -6,17 +6,14 @@ import {
   InternalServerErrorException,
   Post,
   Query,
-  UseGuards,
 } from "@nestjs/common";
 import { RoomsService } from "./rooms.service";
-import { AtGuard } from "../auth";
 
 @Controller("rooms")
 export class RoomsController {
   constructor(private readonly roomsService: RoomsService) {}
 
   @Post()
-  @UseGuards(AtGuard)
   async createRoom(
     @Body()
     userId: string,
@@ -35,7 +32,6 @@ export class RoomsController {
   }
 
   @Get()
-  @UseGuards(AtGuard)
   async getRooms(
     @Query("userId")
     userId: string,
@@ -64,7 +60,6 @@ export class RoomsController {
   }
 
   @Delete("all")
-  @UseGuards(AtGuard)
   async deleteAllRooms(@Query("userId") userId: string) {
     const result = await this.roomsService.deleteAllRooms(userId);
 
@@ -76,6 +71,29 @@ export class RoomsController {
       statusCode: 200,
       timestamp: new Date(),
       data: "deleted all rooms",
+    };
+  }
+
+  @Delete()
+  async deleteRoom(
+    @Body()
+    roomInfo: {
+      roomId: string;
+      userId: string;
+    },
+  ) {
+    const result = await this.roomsService.deleteRoom(roomInfo);
+
+    if (!result)
+      throw new InternalServerErrorException(
+        `Failed to delete room ${roomInfo.roomId}`,
+      );
+
+    return {
+      status: "ok",
+      statusCode: 200,
+      timestamp: new Date(),
+      data: `deleted room ${roomInfo.roomId}`,
     };
   }
 }

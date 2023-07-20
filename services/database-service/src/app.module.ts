@@ -1,10 +1,10 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { AtGuard, AuthModule } from "./modules/auth";
+import { AuthModule } from "./modules/auth";
 import { DrizzleModule } from "./modules/drizzle";
 import { MessagesModule } from "./modules/messages";
 import { RoomsModule } from "./modules/rooms";
-import { APP_GUARD } from "@nestjs/core";
+import { UsersModule } from "./modules/users";
 
 @Module({
   imports: [
@@ -16,13 +16,9 @@ import { APP_GUARD } from "@nestjs/core";
     DrizzleModule,
     MessagesModule,
     RoomsModule,
+    UsersModule,
   ],
   controllers: [],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: AtGuard,
-    },
-  ],
+  providers: [],
 })
 export class AppModule {}

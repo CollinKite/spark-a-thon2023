@@ -1,9 +1,16 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Post,
+  Req,
+  UnauthorizedException,
+  UseGuards,
+} from "@nestjs/common";
 import { AuthService } from "./services";
 import { ValidateServer } from "./auth.service.types";
 import { RtGuard } from "./guards";
-import type { Request } from "express";
 import { Public } from "@/utils/decorators";
+import type { Request } from "express";
 
 @Controller("auth")
 export class AuthController {
@@ -21,20 +28,39 @@ export class AuthController {
     };
   }
 
-  @Post("refresh-token")
-  @UseGuards(RtGuard)
-  async refreshToken(
+  @Public()
+  @Post("validate-user")
+  async validateUser(
     @Body()
-    refresh_token: string
+    userId: string,
   ) {
-
-    await(this.authService.verifyRefresh(refresh_token));
+    const result = await this.authService.generateTokens(userId);
 
     return {
       status: "ok",
       statusCode: 200,
-      data: "test"
+      data: result,
+    };
+  }
+
+  @Post("refresh-token")
+  @UseGuards(RtGuard)
+  async refreshToken(@Req() req: Request) {
+    const refresh_token = req.headers.authorization.split(" ")[1];
+
+    const result = await this.authService.verifyRefresh(refresh_token);
+
+    if (result.success) {
+      const tokens = await this.authService.generateTokens(result.username);
+
+      return {
+        status: "ok",
+        statusCode: 200,
+        timestamp: new Date(),
+        data: tokens,
+      };
     }
 
+    throw new UnauthorizedException("GET OUT");
   }
 }
