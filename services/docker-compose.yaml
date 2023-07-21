@@ -9,6 +9,12 @@ services:
       - ./data:/var/lib/postgresql/data
     ports:
       - 5432:5432
+  
+  ai:
+    build: ./AI
+    restart: always
+    ports:
+      - 5001:5000
 
 volumes:
   data:
