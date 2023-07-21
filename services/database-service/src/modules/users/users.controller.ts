@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Post } from "@nestjs/common";
+import { Body, Controller, Inject, Post, Req } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { Public } from "@/utils/decorators";
 import { RoomsService } from "../rooms/rooms.service";
@@ -17,7 +17,8 @@ export class UsersController {
     @Body()
     userId: string,
   ) {
-    if (!userId) {
+
+    if (userId["userId"].length <= 0) {
       const user = await this.usersService.createUser();
 
       return {
@@ -33,7 +34,7 @@ export class UsersController {
       statusCode: 200,
       timestamp: new Date(),
       data: {
-        id: (await this.usersService.getUser(userId)).id,
+        id: (await this.usersService.getUser(userId["userId"])).id,
       },
     };
   }
