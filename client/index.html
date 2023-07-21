@@ -81,6 +81,10 @@
         newMessage.setAttribute("id", "messagesUser");
         newMessage.innerText = message;
 
+        const messageBox = document.getElementById("messageBox");
+
+        messageBox.appendChild(newMessage);
+
         const messagePayload = {
           roomId: localStorage.getItem("roomId"),
           userId: localStorage.getItem("userId"),
