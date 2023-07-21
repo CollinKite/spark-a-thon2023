@@ -12,40 +12,47 @@ import eventlet
 import socketio
 import requests
 import jwt
-
-
+import logging
 from django.core.wsgi import get_wsgi_application
+
+
+logger = logging.getLogger("mylogger")
+logger.info("Whatever to log")
 
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'socketcontainer.settings')
 
 application = get_wsgi_application()
 
-sio = socketio.Server()
+sio = socketio.Server(cors_allowed_origins="*")
 app = socketio.WSGIApp(sio, application)
 
 # NOTE
 # All prints in SIO on message methods are placeholder and for DEBUG only
+
+
 @sio.on("user_prompt")
 def handlerUser(sid, data):
     print(data)
 
     jiraUrl = "https://placeholder.com/jira/getItemsForUser"
 
-    jiraBody = {"uid": data["userId"], "params": data["params"], "jiratoken": data["jiraToken"]}
+    jiraBody = {"uid": data["userId"],
+                "params": data["params"], "jiratoken": data["jiraToken"]}
 
     response = requests.get(jiraUrl, data=jiraBody)
 
     responseCode = response.status_code
 
-    if(responseCode != 200):
-        sio.emit("error_msg", {"msg": "error retrieving user jira data"}, room=data["roomId"])
+    if (responseCode != 200):
+        sio.emit("error_msg", {
+                 "msg": "error retrieving user jira data"}, room=data["roomId"])
         return
 
     jiraData = response.json()
 
     print(jiraData)
-    # placeholder - not sure how we're using jira data back yet - will tie into finished response 
+    # placeholder - not sure how we're using jira data back yet - will tie into finished response
 
     promptUrl = "https://placeholderAI.com/ai/sendUserPrompt"
 
@@ -55,83 +62,111 @@ def handlerUser(sid, data):
 
     responseAICode = aiResponse.status_code
 
-    if(responseAICode != 201):
-        sio.emit("error_msg", {"msg": "error getting a ai response"}, room=data["roomId"])
+    if (responseAICode != 201):
+        sio.emit("error_msg", {
+                 "msg": "error getting a ai response"}, room=data["roomId"])
         return
-    
 
     aiResponseResult = aiResponse.json()
 
-    sio.emit("finished_prompt_msg", {"userPrompt": data["userPrompt"], "jiraData": jiraData, "aiResponse": aiResponseResult}, room=data["roomId"])
+    sio.emit("finished_prompt_msg", {
+             "userPrompt": data["userPrompt"], "jiraData": jiraData, "aiResponse": aiResponseResult}, room=data["roomId"])
 
+    dbServerUrl = "http://database-service:8080/database/"
 
-    dbServerUrl = "https://placeholderDB.com/database/"
-
-    promptAndResponseDict = {"uid": data["userId"], "prompt": data["userPrompt"], "airesponse":aiResponseResult}
+    promptAndResponseDict = {
+        "uid": data["userId"], "prompt": data["userPrompt"], "airesponse": aiResponseResult}
 
     dbResponse = requests.post(dbServerUrl, data=promptAndResponseDict)
-    
+
     dbResponseCode = dbResponse.status_code
 
-    if(dbResponseCode != 200 or dbResponseCode != 201):
-        sio.emit("error_msg", {"msg": "error saving entry to DB"}, room=data["userId"])
+    if (dbResponseCode != 200 or dbResponseCode != 201):
+        sio.emit("error_msg", {
+                 "msg": "error saving entry to DB"}, room=data["userId"])
+
 
 @sio.on("handle_connect")
 def handleUserRoom(sid, data):
+    logging.error(sid, data)
 
-    if(checkCredentials(sid, data["accessToken"], data["refreshToken"]) == False):
-        sio.emit("error_msg", "Authentication expired!")
-        sio.disconnect(sid=sid)
-    
+    # if (checkCredentials(sid, data["accessToken"], data["refreshToken"]) == False):
+    #     sio.emit("error_msg", "Authentication expired!")
+    #     sio.disconnect(sid=sid)
+
     userId = data["userId"]
 
-    userCreateUrl = "https://placeholderDBUrl/database/getUser"
+    userCreateUrl = "http://database-service:8080/database/users"
 
-    createPayload = {"userId": userId}
+    # createPayload = {"userId": userId}
+    if userId == None:
+        createPayload = {"userId": ""}
+    else:
+        createPayload = {"userId": userId}
 
     requestForNewUser = requests.post(userCreateUrl, data=createPayload)
 
-    if(requestForNewUser.status_code != 201):
+    if (requestForNewUser.status_code != 201):
         sio.emit("error_msg", {"msg": "Error retrieving new user"}, to=sid)
         sio.disconnect(sid)
         return
-    
+
     userData = requestForNewUser.json()
 
+    requestForTokens = requests.post(
+        "http://database-service:8080/database/auth/validate-user", data={"userId": userData["data"]["id"]})
 
-    sio.emit("update_user_id", {"userId": userData["userId"]})
+    if requestForTokens.status_code != 201:
+        sio.emit("error_msg", {"msg": "Error retrieving new user"}, to=sid)
+        sio.disconnect(sid)
+        return
+
+    tokens = requestForTokens.json()
+
+    sio.emit("token_update", {
+        "refresh_token": tokens["data"]["refreshToken"], "authentication_token": tokens["data"]["accessToken"]}, to=sid)
+
+    sio.emit("update_user_id", {"userId": userData["data"]["id"]})
+
 
 @sio.on("create_room")
 def createRoom(sid, data):
+    logging.info(data)
+    logging.info("executed create room :)")
 
-    if(checkCredentials(sid, data["accessToken"], data["refreshToken"]) == False):
-        sio.emit("error_msg", "Authentication expired!")
-        sio.disconnect(sid=sid)
+    # if (checkCredentials(sid, data["accessToken"], data["refreshToken"]) == False):
+    #     sio.emit("error_msg", "Authentication expired!")
+    #     sio.disconnect(sid=sid)
+    # userId = data["userId"]
+    # if userId == None:
+    #     roomPayload = {"userId": ""}
+    # else:
+    #     roomPayload = {"userId": userId}
 
-    roomRequestUrl = "https://placeholderGetRoomId/database/rooms"
+    roomRequestUrl = "http://database-service:8080/database/rooms"
 
-    roomPayload = {"userId": data["userId"]}
+    requestForNewRoom = requests.post(roomRequestUrl, data=data)
 
-    requestForNewRoom = requests.post(roomRequestUrl, params=roomPayload)
-
-    if(requestForNewRoom.status_code != 201):
+    if (requestForNewRoom.status_code != 201):
         sio.emit("error_msg", {"msg": "Error creating new room"}, to=sid)
         return
-    
-    roomDict = {"roomId": requestForNewRoom.json()["roomId"]}
+
+    roomDict = {"roomId": requestForNewRoom.json()["data"]["roomId"]}
 
     sio.emit("update_room_id", data=roomDict)
 
     sio.enter_room(sid, roomDict["roomId"])
-    sio.emit("entered_room", "user successfully entered own room", room=roomDict["roomId"])
+    sio.emit("entered_room", "user successfully entered own room",
+             room=roomDict["roomId"])
 
 
-def checkCredentials(sid:str, authToken:str, refreshToken:str):
+def checkCredentials(sid: str, authToken: str, refreshToken: str):
     try:
         decodedToken = jwt.decode(authToken)
         print(decodedToken)
 
-        sio.emit("token_update", {"refresh_token": refreshToken, "authentication_token": authToken}, to=sid)
+        sio.emit("token_update", {
+                 "refresh_token": refreshToken, "authentication_token": authToken}, to=sid)
         return True
     except:
         try:
@@ -139,7 +174,7 @@ def checkCredentials(sid:str, authToken:str, refreshToken:str):
 
             print(decodedRefreshToken)
 
-            refreshUrl = "http://placeholderAuthAPI/database/refresh-token"
+            refreshUrl = "http://database-service:8080/database/refresh-token"
 
             payload = {"refresh_token": refreshToken}
 
@@ -149,14 +184,14 @@ def checkCredentials(sid:str, authToken:str, refreshToken:str):
 
             if refreshStatus == 400 or refreshStatus != 201:
                 sio.emit("token_invalid", "token is expired or invalid")
-            
+
             tokens = refreshResponse.json()
 
-            sio.emit("token_update", {"refresh_token": tokens["refreshToken"], "authentication_token": tokens["accessToken"]}, to=sid)
+            sio.emit("token_update", {
+                     "refresh_token": tokens["refreshToken"], "authentication_token": tokens["accessToken"]}, to=sid)
             return True
         except:
             return False
-
 
 
 sioPort = 8000
