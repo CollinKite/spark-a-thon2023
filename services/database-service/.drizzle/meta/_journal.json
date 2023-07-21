@@ -1,0 +1,48 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1689718969321,
+      "tag": "0000_gray_sumo",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1689721515951,
+      "tag": "0001_right_captain_midlands",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1689727928531,
+      "tag": "0002_wide_leader",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1689728826297,
+      "tag": "0003_pretty_landau",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1689731893092,
+      "tag": "0004_numerous_lady_vermin",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1689733159510,
+      "tag": "0005_greedy_lake",
+      "breakpoints": true
+    }
+  ]
+}

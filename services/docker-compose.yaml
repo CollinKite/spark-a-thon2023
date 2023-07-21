@@ -1,20 +1,45 @@
-version: '3.1'
+version: "3.8"
+
 services:
   db:
     image: postgres
     restart: always
     environment:
-      POSTGRES_PASSWORD: example
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
     volumes:
-      - ./data:/var/lib/postgresql/data
+      - ../database:/var/lib/postgresql/data
+    networks:
+      - spark
     ports:
       - 5432:5432
-  
+
+  database-service:
+    build:
+      context: ./database-service
+      dockerfile: dockerfile
+      target: production
+    networks:
+      - spark
+    command: sh -c "./command.sh"
+    restart: always
+    env_file:
+      - ./database-service/.env.docker
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+
   ai:
     build: ./AI
     restart: always
     ports:
       - 5001:5000
 
+
 volumes:
-  data:
+  database:
+
+networks:
+  spark:
+    external: false
