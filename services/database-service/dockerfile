@@ -10,6 +10,9 @@ COPY . .
 
 RUN npm run build
 
+ENV SERVER_USER=root
+ENV SERVER_PASSWORD=root
+
 FROM node:18-alpine AS production
 
 ARG NODE_ENV=production

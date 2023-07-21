@@ -2,34 +2,45 @@ import {
   Body,
   Controller,
   InternalServerErrorException,
+  Logger,
   Post,
   Query,
 } from "@nestjs/common";
 import { MessagesService } from "./messages.service";
 import { CreateMessageDto, RoomInformation } from "./messages.types";
+import { Public } from "@/utils/decorators";
 
 @Controller("messages")
 export class MessagesController {
-  constructor(private readonly messagesService: MessagesService) {}
+  private readonly logger = new Logger("Message Logger");
+  constructor(
+    private readonly messagesService: MessagesService) {}
 
+  @Public()
   @Post()
   async createMessage(
     @Body()
-    createMessageDto: CreateMessageDto,
+    createMessageDto: Array<CreateMessageDto>,
   ) {
-    const messageId = await this.messagesService.createMessage(
-      createMessageDto,
-    );
+    console.table(createMessageDto);
+    this.logger.debug("create message");
 
-    if (!messageId)
-      throw new InternalServerErrorException("Failed to create message");
+    for(let i = 0; i < createMessageDto.length; i++) {
+      const messageId = await this.messagesService.createMessage(
+        createMessageDto[i],
+      );
+      
+      if (!messageId)
+        throw new InternalServerErrorException("Failed to create message");
+  
+      }
+      return {
+        status: "ok",
+        statusCode: 200,
+        timestamp: new Date(),
+        data: createMessageDto,
+      };
 
-    return {
-      status: "ok",
-      statusCode: 200,
-      timestamp: new Date(),
-      data: messageId,
-    };
   }
 
   @Post()

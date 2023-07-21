@@ -1,33 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./style/index.css" />
+    <title>spark a thon</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="./style/index.css" />
-  <title>spark a thon</title>
-</head>
-
-<body>
-  <div id="chatbox">
-    <div id="boxybox">
-      <div id="history">
-        Last chat history
+  <body>
+    <div id="chatbox">
+      <div id="boxybox">
+        <div id="history">Last chat history</div>
+        <div id="messageBox">
+        </div>
       </div>
       <div id="messageBox">
         <div id="messagesUser">user message</div>
         <div id="messagesAI">ai message</div>
+      <div>
+        <div id="box">
+          <textarea
+            type="text"
+            id="inputBox"
+            placeholder="Message . . ."
+          ></textarea>
+          <button id="submit">></button>
+        </div>
       </div>
     </div>
-    <div>
-      <div id="box">
-        <textarea type="text" id="inputBox" placeholder="Message . . ." ></textarea>
-        <button id="submit">></button>
-      </div>
-    </div>
-  </div>
 
-  <script src="./script/index.js"></script>
-</body>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+      const messages = [];
 
+      const socket = io("http://localhost:8000");
+      let userId = localStorage.getItem("userId");
+      socket.emit("handle_connect", { userId: userId ? userId : null });
+
+      socket.on("update_user_id", (data) => {
+        console.log(data);
+        console.log("connected");
+
+        userId = data.userId;
+        localStorage.setItem("userId", userId);
+
+        console.log("userId", userId);
+
+        socket.emit("create_room", { userId: userId });
+      });
+
+      socket.on("token_update", (data) => {
+        const { refresh_token, authentication_token } = data;
+
+        localStorage.setItem("refresh_token", refresh_token);
+        localStorage.setItem("authentication_token", authentication_token);
+      });
+
+      socket.on("update_room_id", (data) => {
+        console.log("update_room_id", data);
+        localStorage.setItem("roomId", data.roomId);
+      });
+
+      socket.on("entered_room", (data) => {
+        console.log("entered_room", data);
+      });
+
+      socket.on("finished_prompt_msg", ({ message }) => {
+        messages.push({ AI: message });
+
+        const messageBox = document.getElementById("messageBox");
+
+        const newMessage = document.createElement("p");
+        newMessage.setAttribute("id", "messagesAI");
+        newMessage.innerText = message;
+        messageBox.appendChild(newMessage);
+      })
+
+      document.getElementById("submit").addEventListener("click", () => {
+        const message = document.getElementById("inputBox").value;
+        messages.push({ User: message });
+
+        const newMessage = document.createElement("p");
+        newMessage.setAttribute("id", "messagesUser");
+        newMessage.innerText = message;
+
+        const messageBox = document.getElementById("messageBox");
+
+        messageBox.appendChild(newMessage);
+
+        const messagePayload = {
+          roomId: localStorage.getItem("roomId"),
+          userId: localStorage.getItem("userId"),
+          email: "brayden.wong@niceincontact.com",
+          api_token: localStorage.getItem("api_key"),
+          messages: messages
+        }
+
+        console.log(messagePayload);
+
+        socket.emit("user_prompt", messagePayload);
+
+        document.getElementById("inputBox").value = "";
+      });
+    </script>
+  </body>
 </html>

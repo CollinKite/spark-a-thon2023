@@ -30,6 +30,25 @@ services:
     depends_on:
       - db
 
+  websocket-service:
+    build:
+      context: ./django-socketio
+      dockerfile: Dockerfile
+    networks:
+      - spark
+    restart: always
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+  ai:
+    build: ./AI
+    restart: always
+    ports:
+      - 5000:5000
+    networks:
+      - spark
+
 volumes:
   database:
 

@@ -4,6 +4,7 @@ import { AuthModule } from "./modules/auth";
 import { DrizzleModule } from "./modules/drizzle";
 import { MessagesModule } from "./modules/messages";
 import { RoomsModule } from "./modules/rooms";
+import { UsersModule } from "./modules/users";
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { RoomsModule } from "./modules/rooms";
     DrizzleModule,
     MessagesModule,
     RoomsModule,
+    UsersModule,
   ],
   controllers: [],
   providers: [],

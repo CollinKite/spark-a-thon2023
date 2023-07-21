@@ -5,6 +5,8 @@ import { compare } from "bcryptjs";
 import { ValidateServer } from "../auth.service.types";
 import { JwtService } from "@nestjs/jwt";
 
+import { Token } from "@/utils/types";
+import { D } from "drizzle-orm/query-promise.d-0dd411fc";
 @Injectable()
 export class AuthService {
   constructor(
@@ -26,17 +28,19 @@ export class AuthService {
   }
 
   private async validateCredentials(username: string, password: string) {
-    const SERVER_USER = this.config.get<string>("SERVER_USER");
+    const SERVER_USERNAME = this.config.get<string>("SERVER_USERNAME");
     const SERVER_PASSWORD = this.config.get<string>("SERVER_PASSWORD");
 
+    console.log(SERVER_USERNAME, SERVER_PASSWORD);
+
     return (
-      (await compare(username, SERVER_USER)) &&
+      (await compare(username, SERVER_USERNAME)) &&
       (await compare(password, SERVER_PASSWORD))
     );
   }
 
   //generate tokens here
-  private async generateTokens(username: string) {
+  async generateTokens(username: string) {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
         { username },
@@ -49,5 +53,15 @@ export class AuthService {
     ]);
 
     return { accessToken, refreshToken } as const;
+  }
+
+  public async verifyRefresh(token: string) {
+    const decodeResult = this.jwtService.decode(token) as Token;
+
+    console.log(decodeResult);
+
+    return decodeResult
+      ? { success: true, id: decodeResult.username }
+      : { success: false, username: null };
   }
 }

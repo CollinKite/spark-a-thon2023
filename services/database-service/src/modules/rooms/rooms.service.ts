@@ -16,6 +16,8 @@ export class RoomsService {
   async createRoom(userId: string) {
     const id = cuid();
 
+    console.log("userId", userId, "roomId", id);
+
     const createRoom = this.db
       .insert(rooms)
       .values({

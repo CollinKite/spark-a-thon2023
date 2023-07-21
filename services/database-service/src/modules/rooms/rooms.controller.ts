@@ -16,8 +16,9 @@ export class RoomsController {
   @Post()
   async createRoom(
     @Body()
-    userId: string,
+    { userId }: { userId: string },
   ) {
+    console.log(userId);
     const room = await this.roomsService.createRoom(userId);
 
     if (room)
@@ -25,7 +26,7 @@ export class RoomsController {
         status: "ok",
         statusCode: 200,
         timestamp: new Date(),
-        data: room,
+        data: { roomId: room },
       };
 
     throw new Error("Failed to create room");
@@ -71,6 +72,29 @@ export class RoomsController {
       statusCode: 200,
       timestamp: new Date(),
       data: "deleted all rooms",
+    };
+  }
+
+  @Delete()
+  async deleteRoom(
+    @Body()
+    roomInfo: {
+      roomId: string;
+      userId: string;
+    },
+  ) {
+    const result = await this.roomsService.deleteRoom(roomInfo);
+
+    if (!result)
+      throw new InternalServerErrorException(
+        `Failed to delete room ${roomInfo.roomId}`,
+      );
+
+    return {
+      status: "ok",
+      statusCode: 200,
+      timestamp: new Date(),
+      data: `deleted room ${roomInfo.roomId}`,
     };
   }
 }
