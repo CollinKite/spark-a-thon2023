@@ -10,13 +10,10 @@
   <body>
     <div id="chatbox">
       <div id="boxybox">
-        <div id="history">Last chat history</div>
+        <!-- <div id="history">Last chat history</div> -->
         <div id="messageBox">
         </div>
       </div>
-      <div id="messageBox">
-        <div id="messagesUser">user message</div>
-        <div id="messagesAI">ai message</div>
       <div>
         <div id="box">
           <textarea
@@ -91,10 +88,12 @@
         const messagePayload = {
           roomId: localStorage.getItem("roomId"),
           userId: localStorage.getItem("userId"),
-          email: localStorage.getItem("email"),
+          email: "brayden.wong@niceincontact.com",
           api_token: localStorage.getItem("api_key"),
           messages: messages
         }
+
+        console.log(messagePayload);
 
         socket.emit("user_prompt", messagePayload);
 
