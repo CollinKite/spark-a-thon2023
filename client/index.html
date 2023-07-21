@@ -12,8 +12,6 @@
       <div id="boxybox">
         <div id="history">Last chat history</div>
         <div id="messageBox">
-          <div id="messagesUser">user message</div>
-          <div id="messagesAI">AI message</div>
         </div>
       </div>
       <div>
@@ -65,14 +63,23 @@
       });
 
       socket.on("finished_prompt_msg", ({ message }) => {
-        messages.push({ AI: "message "});
+        messages.push({ AI: message });
 
-        console.log(messages);
+        const messageBox = document.getElementById("messageBox");
+
+        const newMessage = document.createElement("p");
+        newMessage.setAttribute("id", "messagesAI");
+        newMessage.innerText = message;
+        messageBox.appendChild(newMessage);
       })
 
       document.getElementById("submit").addEventListener("click", () => {
         const message = document.getElementById("inputBox").value;
         messages.push({ User: message });
+
+        const newMessage = document.createElement("p");
+        newMessage.setAttribute("id", "messagesUser");
+        newMessage.innerText = message;
 
         const messagePayload = {
           roomId: localStorage.getItem("roomId"),
@@ -85,6 +92,8 @@
         console.log(messagePayload);
 
         socket.emit("user_prompt", messagePayload);
+
+        document.getElementById("inputBox").value = "";
       });
     </script>
   </body>

@@ -99,7 +99,9 @@ def handlerUser(sid, data):
         }
     ]
 
-    dbResponse = requests.post(dbServerUrl, data=databaseInsert)
+    headers = {"Content-Type": "application/json; charset=utf-8"}
+
+    dbResponse = requests.post(dbServerUrl, headers=headers, json=databaseInsert)
 
     dbResponseCode = dbResponse.status_code
 

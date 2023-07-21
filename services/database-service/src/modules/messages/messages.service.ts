@@ -10,12 +10,12 @@ export class MessagesService {
 
   async createMessage(createMessageDto: CreateMessageDto) {
     const id = cuid();
-    const createMessage = this.db
+    const insertMessage = this.db
       .insert(messages)
       .values({ ...createMessageDto, id })
-      .prepare("create message");
+      .prepare("insert message");
 
-    const result = await createMessage.execute();
+    const result = await insertMessage.execute();
 
     return result.rowCount > 0 ? id : null;
   }
