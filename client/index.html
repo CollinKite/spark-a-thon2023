@@ -88,12 +88,10 @@
         const messagePayload = {
           roomId: localStorage.getItem("roomId"),
           userId: localStorage.getItem("userId"),
-          email: "brayden.wong@niceincontact.com",
+          email: localStorage.getItem("email"),
           api_token: localStorage.getItem("api_key"),
           messages: messages
         }
-
-        console.log(messagePayload);
 
         socket.emit("user_prompt", messagePayload);
 
