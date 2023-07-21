@@ -56,55 +56,50 @@ def getServerTokens():
 # NOTE
 # All prints in SIO on message methods are placeholder and for DEBUG only
 
-
 @sio.on("user_prompt")
 def handlerUser(sid, data):
-    print(data)
 
-    jiraUrl = "http://ai:5000/jira/getItemsForUser"
+    promptUrl = "http://ai:5000/AI/message"
 
-    jiraBody = {"uid": data["userId"],
-                "params": data["params"], "jiratoken": data["jiraToken"]}
+    aiBody = {
+            "messages": data["messages"], "email": data["email"], "api_token": data["api_token"]}
 
-    response = requests.get(jiraUrl, data=jiraBody)
+    headers = {"Content-Type": "application/json; charset=utf-8"}
 
-    responseCode = response.status_code
-
-    if (responseCode != 200):
-        sio.emit("error_msg", {
-                 "msg": "error retrieving user jira data"}, room=data["roomId"])
-        return
-
-    jiraData = response.json()
-
-    print(jiraData)
-    # placeholder - not sure how we're using jira data back yet - will tie into finished response
-
-    promptUrl = "http://ai:5000/ai/message"
-
-    aiBody = {"uid": data["userId"],
-              "messages": data["userMessages"], "api_token": data["apiToken"]}
-
-    aiResponse = requests.post(promptUrl, data=aiBody)
+    aiResponse = requests.post(promptUrl, headers=headers, json=aiBody)
 
     responseAICode = aiResponse.status_code
 
-    if (responseAICode != 201):
+    if (responseAICode != 200):
         sio.emit("error_msg", {
                  "msg": "error getting a ai response"}, room=data["roomId"])
         return
 
     aiResponseResult = aiResponse.json()
 
-    sio.emit("finished_prompt_msg", {
-             "userPrompt": data["userPrompt"], "jiraData": jiraData, "aiResponse": aiResponseResult}, room=data["roomId"])
+    logging.info(aiResponseResult)
 
-    dbServerUrl = "http://database-service:8080/database/"
+    response = aiResponseResult["response"]
 
-    promptAndResponseDict = {
-        "uid": data["userId"], "prompt": data["userPrompt"], "airesponse": aiResponseResult}
+    sio.emit("finished_prompt_msg", { "message": response }, room=data["roomId"])
 
-    dbResponse = requests.post(dbServerUrl, data=promptAndResponseDict)
+    dbServerUrl = "http://database-service:8080/database/messages"
+
+    databaseInsert = [
+        {
+            "content": aiBody["messages"][-1],
+            "userId": data["userId"],
+            "roomId": data["roomId"],
+            "messageBy": "user"
+        },
+        {
+            "content": response,
+            "roomId": data["roomId"],
+            "messageBy": "ai-model"
+        }
+    ]
+
+    dbResponse = requests.post(dbServerUrl, data=databaseInsert)
 
     dbResponseCode = dbResponse.status_code
 

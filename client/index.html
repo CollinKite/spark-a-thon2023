@@ -28,9 +28,10 @@
       </div>
     </div>
 
-    <script src="./script/index.js"></script>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script>
+      const messages = [];
+
       const socket = io("http://localhost:8000");
       let userId = localStorage.getItem("userId");
       socket.emit("handle_connect", { userId: userId ? userId : null });
@@ -63,11 +64,27 @@
         console.log("entered_room", data);
       });
 
+      socket.on("finished_prompt_msg", ({ message }) => {
+        messages.push({ AI: "message "});
+
+        console.log(messages);
+      })
+
       document.getElementById("submit").addEventListener("click", () => {
-        console.log("HTML FUCKING SUCKS");
-        console.log("userId", userId);
         const message = document.getElementById("inputBox").value;
-        socket.emit("user_prompt", message);
+        messages.push({ User: message });
+
+        const messagePayload = {
+          roomId: localStorage.getItem("roomId"),
+          userId: localStorage.getItem("userId"),
+          email: "brayden.wong@niceincontact.com",
+          api_token: localStorage.getItem("api_key"),
+          messages: messages
+        }
+
+        console.log(messagePayload);
+
+        socket.emit("user_prompt", messagePayload);
       });
     </script>
   </body>
