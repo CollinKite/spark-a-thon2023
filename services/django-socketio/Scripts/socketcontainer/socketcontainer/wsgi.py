@@ -27,6 +27,32 @@ application = get_wsgi_application()
 sio = socketio.Server(cors_allowed_origins="*")
 app = socketio.WSGIApp(sio, application)
 
+accessToken = ""
+refreshToken = ""
+
+
+def getServerTokens():
+    serverAuthUrl = "http://database-service:8080/database/auth/validate-server"
+
+    serverUser = os.environ.get("SERVER_USER")
+    serverPass = os.environ.get("SERVER_PASSWORD")
+    if (serverUser == None or serverPass == None):
+        serverUser = "root"
+        serverPass = "password"
+
+    requestResult = requests.post(
+        serverAuthUrl, data={"username": serverUser, "password": serverPass})
+
+    if (requestResult.status_code != 200):
+        print("ERROR: could not retrieve auth tokens!")
+        return
+
+    result = requestResult.json()
+
+    accessToken = result["data"]["accessToken"]
+    refreshToken = result["data"]["refreshToken"]
+
+
 # NOTE
 # All prints in SIO on message methods are placeholder and for DEBUG only
 
@@ -54,9 +80,10 @@ def handlerUser(sid, data):
     print(jiraData)
     # placeholder - not sure how we're using jira data back yet - will tie into finished response
 
-    promptUrl = "https://placeholderAI.com/ai/sendUserPrompt"
+    promptUrl = "https://placeholderAI.com/ai/message"
 
-    aiBody = {"uid": data["userId"], "prompt": data["userPrompt"]}
+    aiBody = {"uid": data["userId"],
+              "messages": data["userMessages"], "api_token": data["apiToken"]}
 
     aiResponse = requests.post(promptUrl, data=aiBody)
 

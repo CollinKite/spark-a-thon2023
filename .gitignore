@@ -1,7 +1,14 @@
 django-socketio/Lib
+<<<<<<< HEAD
+services/data/
+=======
 database/
 services/django-socketio/Lib
 services/django-socketio/Include
 services/data/
+<<<<<<< HEAD
 
 .DS_Store
+=======
+>>>>>>> origin/main
+>>>>>>> origin/Ai-service
