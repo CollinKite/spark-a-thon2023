@@ -61,7 +61,7 @@ def getServerTokens():
 def handlerUser(sid, data):
     print(data)
 
-    jiraUrl = "https://placeholder.com/jira/getItemsForUser"
+    jiraUrl = "http://ai:5000/jira/getItemsForUser"
 
     jiraBody = {"uid": data["userId"],
                 "params": data["params"], "jiratoken": data["jiraToken"]}
@@ -80,7 +80,7 @@ def handlerUser(sid, data):
     print(jiraData)
     # placeholder - not sure how we're using jira data back yet - will tie into finished response
 
-    promptUrl = "https://placeholderAI.com/ai/message"
+    promptUrl = "http://ai:5000/ai/message"
 
     aiBody = {"uid": data["userId"],
               "messages": data["userMessages"], "api_token": data["apiToken"]}
