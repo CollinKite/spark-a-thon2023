@@ -4,6 +4,7 @@ body {
   padding: 0;
   margin: 0p;
   color: #D8DBE2;
+  font-family: sans-serif;
 }
 
 #chatbox {
@@ -74,8 +75,8 @@ textarea{
 
 #messagesUser{
   border: 2px #58A4B0 solid;
-  background-color: #A9BCD0;
-  color: #1B1B1E;
+  background-color: #008cff;
+  color: #ffffff;
   border-radius: 5px;
   padding: 3px;
   margin-bottom: 2px;
@@ -87,7 +88,7 @@ textarea{
 #messagesAI{
   text-align: right;
   border: 2px #58A4B0 solid;
-  background-color: #A9BCD0;
+  background-color: #ffffff;
   color: #1B1B1E;
   border-radius: 5px;
   padding: 3px;
