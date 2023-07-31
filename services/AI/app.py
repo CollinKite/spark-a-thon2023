@@ -20,7 +20,7 @@ LLM_OPENAI_GPT35 = "gpt-3.5-turbo"
 embedding = OpenAIEmbeddings()
 
 
-def get_assigned_issues(api_token, email, instance_url="https://nice-ce-cxone-prod.atlassian.net/"):
+def get_assigned_issues(api_token, email, instance_url="https://YOUR.COMPANY.atlassian.net/"):
     # Construct URL for Jira API
     api_url = f"{instance_url}/rest/api/2/search"
 
